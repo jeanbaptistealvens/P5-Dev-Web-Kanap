@@ -26,13 +26,13 @@ console au démarrage du serveur, par ex. `Écoute sur le port 3001`.
  Insérer les produits dans la page d’accueil : OK
 
 Étape 4 
-Faire le lien entre un produit de la page d’accueil et la page Produit : OK
+ Faire le lien entre un produit de la page d’accueil et la page Produit : OK
 
-Étape 5  
+Étape 5
  Récupérer l’id du produit à afficher : OK
 
 Étape 6 
-Insérer un produit et ses détails dans la page Produit : OK
+ Insérer un produit et ses détails dans la page Produit : OK
 
 Étape 7 
  Ajouter des produits dans le panier : OK
