@@ -17,7 +17,7 @@ console au démarrage du serveur, par ex. `Écoute sur le port 3001`.
 ### Les étapes clés ci-dessous ont été vérifiées et fonctionnelles : ### 
 
 Étape 1 
- Prendre en main les maquettes HTML / CSS : OK
+ Prendre en main les maquettes HTML et CSS : OK
 
 Étape 2 
  Manipuler l’API : OK
