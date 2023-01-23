@@ -1,26 +1,41 @@
+// Déclare une variable "url" qui contient l'URL d'une API pour récupérer des informations sur les produits
 const url = 'http://localhost:3000/api/products/';
+// Stocke les produits dans un tableau vide 
 var products = [];
-
+// Ajoute un écouteur d'événement pour l'événement "load" de la fenêtre
 window.addEventListener('load', function () {
+    // Récupère l'élément HTML avec l'id "cart__items"
     const cart = document.getElementById('cart__items');
+    // Si l'élément existe
     if (cart) {
+        // Exécute la fonction "fill" pour remplir le panier, puis 
+        // exécute la fonction "watch" pour surveiller les événements sur les éléments du panier
         fill().then(watch);
     }
 });
-
+// Rempli le panier d'achat en initialisant des variable pour
 async function fill() {
+    // Stocke la quantité totale, le prix total, le code HTML et la quantité d'un produit 
+    // spécifique dans des variables
     var totalQuantity = 0;
     var totalPrice = 0;
     var html = '';
     var quantity = 0;
-
+    // Récupére toutes les clés stockées dans le localStorage 
     let keys = Object.keys(localStorage);
+    // Itère sur toutes les clés récupérées
     for (let key of keys) {
+        // Récupère le produit correspondant à la clé courante
         var product = await get_product(key);
+        // Stocke le produit dans le tableau products
         products[key] = product;
+        // Récupère les propriétés de l'objet JSON (couleurs) stocké dans localStorage pour cette clé
         const colors = Object.getOwnPropertyNames(JSON.parse(localStorage.getItem(key)));
+         // Boucle sur toutes les couleurs
         for (let color of colors) {
+            // Récupère la quantité stockée pour cette couleur
             quantity = parseInt(JSON.parse(localStorage.getItem(key))[color]);
+            // Ajoute le code HTML pour afficher les informations sur le produit dans le panier
             html += `
             <article class="cart__item" data-id="${product._id}" data-color="${color}">
                 <div class="cart__item__img">
@@ -43,20 +58,23 @@ async function fill() {
                     </div>
                 </div>
             </article>`;
-
+            // Incrémente les totaux de quantité et de prix
             totalQuantity += quantity;
             totalPrice += quantity * product.price;
         }
     }
+    // Insère le HTML généré dans le panier
     document.getElementById('cart__items').insertAdjacentHTML('afterbegin', html);
+    // Met à jour les totaux affichés
     document.getElementById('totalQuantity').innerHTML = totalQuantity;
     document.getElementById('totalPrice').innerHTML = totalPrice
 }
 
 async function watch() {
     var items = document.getElementsByClassName('cart__item');
-
+    
     if (items) {
+        // Boucle sur tous les éléments
         for (let item of items) {
             item.getElementsByClassName('itemQuantity')[0].addEventListener('change', async () => {
                 await update_quantity(item.closest('[data-id]'));
@@ -131,29 +149,36 @@ async function get_product(id) {
 
 
 async function submit() {
-
+// Vide les messages d'erreur pour les champs "firstName", "lastName", "address", "city" et "email"
     get_data('firstNameErrorMsg').innerHTML = '';
     get_data('lastNameErrorMsg').innerHTML = '';
     get_data('lastNameErrorMsg').innerHTML = '';
     get_data('addressErrorMsg').innerHTML = '';
     get_data('cityErrorMsg').innerHTML = '';
     get_data('emailErrorMsg').innerHTML = '';
-
+    
+    // Valide les données du client
     validate_customer_data();
-
+    
+    // Récupère le formulaire
     var form = document.getElementsByClassName('cart__order__form')[0];
 
+     // Si le formulaire est valide
     if (form.checkValidity()) {
+        // Crée un objet "contact" pour stocker les données du formulaire
         contact = {};
         for (let element of form.elements) {
             if (element.type !== "submit") {
                 contact[element.name] = element.value;
             }
         }
+        // Récupère les produits du panier
         const products = Object.keys(localStorage);
+        // Crée un objet "data" pour stocker les produits et les données de contact
         data = { products, contact };
+        // Envoie les données et récupère la réponse
         response = await send(data);
-
+        // Redirige vers la page de confirmation avec l'identifiant de commande
         window.location.href = '/front/html/confirmation.html?orderId=' + response.orderId;;
     }
 }
@@ -212,3 +237,25 @@ async function send(data) {
 
     return await response.json();
 }
+
+// J'utilise l'événement "load" de la fenêtre pour déclencher une fonction lorsque la page est chargée. Il recherche un 
+// élément HTML avec l'identifiant "cart__items" et appelle les fonctions "fill" et "watch" si l'élément est présent. J'utilise 
+// ensuite la fonction "if" pour permettre quoi qu'il arrive que les données  soient exploitables et d'éviter donc de produire des erreurs.
+
+// J'utilise la fonction "fill" qui utilise l'objet "localStorage" pour récupérer les données des produits ajoutés au panier et 
+// pour construire une chaîne HTML qui affiche ces produits. J'utilise des boucles pour parcourir les produits et les couleurs, et 
+// j'utilise des fonctions "get_product" pour récupérer les données des produits. J'utilise également des variables pour calculer le 
+// total de la quantité et le total des prix. J'utilise la fonction "parseInt" est pour convertir la valeur de la quantité d'un article 
+// dans le panier stocké dans le localStorage en un nombre entier avant de l'utiliser pour calculer le total de la quantité et le total du 
+// prix. Cela s'assure que les calculs mathématiques effectués sur ces valeurs sont corrects et précis. J'utilise ensuite la propriété 
+// "innerHTML" pour insérer cette chaîne HTML dans la page et mettre à jour les éléments de totalisation.
+
+// J'utilise la fonction "watch" et j'ajoute des événements "change" et "click" aux éléments de la page pour permettre à l'utilisateur 
+// de mettre à jour la quantité et de supprimer des produits du panier. J'ajoute également un événement "click" au bouton de commande 
+// pour lancer la fonction "submit" lorsque l'utilisateur clique dessus.
+
+// J'utilise les fonctions "update_quantity", "remove" et "update_price"pour mettre à jour les informations de panier en utilisant l'objet 
+// "localStorage" et pour mettre à jour les éléments de la page en conséquence.
+
+// En gros, mon code permet d'afficher les produits ajoutés au panier, de permettre à l'utilisateur de mettre à jour les quantités et de 
+// supprimer les produits, et de soumettre la commande.
