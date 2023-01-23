@@ -112,7 +112,7 @@ function add_to_cart(product) {
         // affiche un message d'alerte indiquant à l'utilisateur qu'il doit sélectionner une couleur
         alert('You must choose a color!');
     }
-    // vérifie si la quantité saisie par l'utilisateur est inférieure à 1, 1, si c'est le cas
+    // vérifie si la quantité saisie par l'utilisateur est inférieure à 1, si c'est le cas
     if (document.getElementById('quantity').value < 1) {
         // affiche un message d'alerte indiquant à l'utilisateur qu'il doit ajouter au moins un article
         alert('You must add at least one item!');

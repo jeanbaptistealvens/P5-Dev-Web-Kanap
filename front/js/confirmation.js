@@ -13,7 +13,7 @@ function print_order(param) {
 // J'utilise l'événement "load" de la fenêtre pour déclencher une fonction lorsque la page est chargée. 
 // Il récupère les paramètres dans l'URL de la page en utilisant "window.location.search" et appelle une 
 // fonction "print_order" en lui passant ces paramètres en paramètre.Je peux ainisi être sûr que les paramètres 
-// de l'URL sont disponibles pour récupérer et utiliser avant de les afficher sur la page.J'utilise la fonction "if" 
+// de l'URL sont disponibles pour récupérer et l'utiliser avant de les afficher sur la page.J'utilise la fonction "if" 
 // pour permettre quoi qu'il arrive que les données soient exploitables et d'éviter donc de produire des erreurs.
 
 // J'utilise la fonction "print_order" qui utilise l'objet URLSearchParams pour récupérer l'ID de la commande 
