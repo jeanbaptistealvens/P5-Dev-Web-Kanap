@@ -1,153 +1,205 @@
-// Déclare une variable "url" qui contient l'URL d'une API pour récupérer des informations sur les produits
+// Déclaration de l'URL de l'API
 const url = 'http://localhost:3000/api/products/';
-// Stocke les produits dans un tableau vide 
+ // Déclare un tableau vide pour stocker les produits 
 var products = [];
-// Ajoute un écouteur d'événement pour l'événement "load" de la fenêtre
+
+// Ajoute un écouteur d'événement pour l'événement "load"(chargement) de la fenêtre
 window.addEventListener('load', function () {
-    // Récupère l'élément HTML avec l'id "cart__items"
+    // Récupère l'élément HTML avec l'id pour la section "cart__items"
     const cart = document.getElementById('cart__items');
     // Si l'élément existe
     if (cart) {
-        // Exécute la fonction "fill" pour remplir le panier, puis 
-        // exécute la fonction "watch" pour surveiller les événements sur les éléments du panier
+        // Appelle les fonctions pour remplir et surveiller le panier
         fill().then(watch);
     }
 });
-// Rempli le panier d'achat en initialisant des variable pour
+
+// Fonction pour remplir le panier avec les produits enregistrés dans le stockage local
 async function fill() {
-    // Stocke la quantité totale, le prix total, le code HTML et la quantité d'un produit 
-    // spécifique dans des variables
+    //Initialise de la quantité totale à 0
     var totalQuantity = 0;
+    // Initialise du prix total à 0
     var totalPrice = 0;
+    // Initialise la variable html à une chaîne vide
     var html = '';
+   // Initialise de la quantité à 0
     var quantity = 0;
-    // Récupére toutes les clés stockées dans le localStorage 
+
+    // Récupére toutes les clés dans le localStorage
     let keys = Object.keys(localStorage);
-    // Itère sur toutes les clés récupérées
+    // Boucle sur chaque clé
     for (let key of keys) {
-        // Récupère le produit correspondant à la clé courante
+        // Récupère les informations du produit à partir de la clé
         var product = await get_product(key);
-        // Stocke le produit dans le tableau products
+        // Ajoute le produit au tableau "products"
         products[key] = product;
-        // Récupère les propriétés de l'objet JSON (couleurs) stocké dans localStorage pour cette clé
+        // Récupère les couleurs du produit enregistrées dans le stockage local
         const colors = Object.getOwnPropertyNames(JSON.parse(localStorage.getItem(key)));
-         // Boucle sur toutes les couleurs
+        // Boucle sur chaque couleur
         for (let color of colors) {
-            // Récupère la quantité stockée pour cette couleur
+            // Récupère la quantité enregistrée pour cette couleur et la convertit en entier
             quantity = parseInt(JSON.parse(localStorage.getItem(key))[color]);
-            // Ajoute le code HTML pour afficher les informations sur le produit dans le panier
+            // Construit la structure HTML pour chaque produit avec les données récupérées
             html += `
             <article class="cart__item" data-id="${product._id}" data-color="${color}">
-                <div class="cart__item__img">
-                    <img src="${product.imageUrl}" alt="${product.altTxt}">
+            <div class="cart__item__img">
+                <img src="${product.imageUrl}" alt="${product.altTxt}">
+            </div>
+            <div class="cart__item__content">
+                <div class="cart__item__content__description">
+                <h2>${product.name}</h2>
+                <p>${color}</p>
+                <p>${product.price} €</p>
                 </div>
-                <div class="cart__item__content">
-                    <div class="cart__item__content__description">
-                    <h2>${product.name}</h2>
-                    <p>${color}</p>
-                    <p>${product.price} €</p>
-                    </div>
-                    <div class="cart__item__content__settings">
-                    <div class="cart__item__content__settings__quantity">
-                        <p>Qté : </p>
-                        <input type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${quantity}">
-                    </div>
-                    <div class="cart__item__content__settings__delete">
-                        <p class="deleteItem">Supprimer</p>
-                    </div>
-                    </div>
+                <div class="cart__item__content__settings">
+                <div class="cart__item__content__settings__quantity">
+                    <p>Qté : </p>
+                    <input type="number" class="itemQuantity" name="itemQuantity" min="1" max="100" value="${quantity}">
                 </div>
-            </article>`;
-            // Incrémente les totaux de quantité et de prix
-            totalQuantity += quantity;
-            totalPrice += quantity * product.price;
-        }
+                <div class="cart__item__content__settings__delete">
+                    <p class="deleteItem">Supprimer</p>
+                </div>
+                </div>
+            </div>
+        </article>`;
+
+         // Incrémente la quantité et du prix total
+        totalQuantity += quantity;
+        // Incrémenter le prix total en multipliant la quantité par le prix du produit
+        totalPrice += quantity * product.price;
     }
-    // Insère le HTML généré dans le panier
-    document.getElementById('cart__items').insertAdjacentHTML('afterbegin', html);
-    // Met à jour les totaux affichés
-    document.getElementById('totalQuantity').innerHTML = totalQuantity;
-    document.getElementById('totalPrice').innerHTML = totalPrice
+}
+// Ajoute le HTML au panier 
+document.getElementById('cart__items').insertAdjacentHTML('afterbegin', html);
+// Met à jour de la quantité totale affichée
+document.getElementById('totalQuantity').innerHTML = totalQuantity;
+ // Met à jour du prix total affiché
+document.getElementById('totalPrice').innerHTML = totalPrice
 }
 
+// Fonction pour ajouter des écouteurs d'événements aux éléments du panier
 async function watch() {
-    var items = document.getElementsByClassName('cart__item');
-    
-    if (items) {
-        // Boucle sur tous les éléments
-        for (let item of items) {
-            item.getElementsByClassName('itemQuantity')[0].addEventListener('change', async () => {
-                await update_quantity(item.closest('[data-id]'));
-            });
-            item.getElementsByClassName('deleteItem')[0].addEventListener('click', () => {
-                remove(item.closest('[data-id]'));
-            });
-        }
+// Récupère tous les éléments HTML de classe "cart__item"
+var items = document.getElementsByClassName('cart__item');
+
+// Vérifie s'il y a des éléments
+if (items) {
+    // Boucle sur chaque élément
+    for (let item of items) {
+        // Ajoute un écouteur d'événement pour l'événement "change" sur la quantité
+        item.getElementsByClassName('itemQuantity')[0].addEventListener('change', async () => {
+            // Appelle la fonction pour mettre à jour la quantité
+            await update_quantity(item.closest('[data-id]'));
+        });
+        // Ajoute un écouteur d'événement pour le clic sur le bouton "Supprimer"
+        item.getElementsByClassName('deleteItem')[0].addEventListener('click', () => {
+            // Appelle la fonction pour supprimer l'élément
+            remove(item.closest('[data-id]'));
+        });
+    }
+        // Ajoute un écouteur d'événement "click" à l'élément HTML ayant l'id "order"
+        // lorsque l'événement "click" est détecté
         document.getElementById('order').addEventListener('click', (event) => {
+            // Désactive l'action d'envoyer par défaut de l'élément HTML lorsque l'événement est déclenché
             event.preventDefault();
             submit();
         });
     }
 }
 
+//  Fonction pour mettre à jour la quantité d'un produit spécifique dans le panier en récupérant l'identifiant, 
+// la couleur et la quantité à partir des données de l'élément ciblé.
 async function update_quantity(target) {
+    // Récupère l'id et la couleur du produit à partir des attributs de données de l'élément
     const id = target.dataset.id;
     const color = target.dataset.color;
+    // Récupère la quantité du produit enregistrée dans le stockage local
     const quantity = parseInt(target.getElementsByClassName('itemQuantity')[0].value);
 
-    var record = JSON.parse(localStorage.getItem(id));
-    record[color] = quantity;
-    localStorage.setItem(id, JSON.stringify(record));
+// Récupère les informations enregistrées pour ce produit dans le stockage local
+var record = JSON.parse(localStorage.getItem(id));
+// Met à jour la quantité pour la couleur spécifiée
+record[color] = quantity;
+// Enregistre les informations mises à jour dans le stockage local
+localStorage.setItem(id, JSON.stringify(record));
 
-    await update_price();
+// Appelle la fonction pour mettre à jour le prix total
+await update_price();
 }
 
+// Fonction pour mettre à jour la quantité d'un produit spécifique dans le panier en récupérant l'identifiant, 
+// la couleur et la quantité à partir des données de l'élément ciblé.
 async function remove(target) {
     const id = target.dataset.id;
     const color = target.dataset.color;
 
-    var obj = JSON.parse(localStorage.getItem(id));
-    delete obj[color];
+// Récupère les informations enregistrées pour ce produit dans le stockage local
+var obj = JSON.parse(localStorage.getItem(id));
+// Supprime la couleur spécifiée de l'objet
+delete obj[color];
 
-    if (Object.keys(obj).length === 0) {
-        localStorage.removeItem(id);
-    }
-    else {
-        localStorage.setItem(id, JSON.stringify(obj));
-    }
-
-    target.remove();
-    await update_price();
+// S'il reste des couleurs pour ce produit dans le stockage local
+if (Object.keys(obj).length === 0) {
+    // Supprime de l'objet entier s'il ne contient plus de couleurs
+    localStorage.removeItem(id);
+}
+else {
+    // Enregistre les informations mises à jour dans le stockage local
+    localStorage.setItem(id, JSON.stringify(obj));
 }
 
+// Supprime l'élément HTML du panier
+target.remove();
+// Appelle la fonction pour mettre à jour le prix total
+await update_price();
+}
+
+// Fonction pour mettre à jour le prix total du panier
 async function update_price() {
+    // Initialise la quantité total à 0 
     var articles = 0;
+    // Initialise le prix total à 0 
     var total = 0;
 
+    // Récupère les identifiants des produits stockés dans le stockage local
+    // pour les utiliser dans la boucle pour cibler les éléments correspondants dans le DOM.
     const ids = Object.keys(localStorage);
 
+    // Boucle sur chaque id pour récupérer les éléments correspondants dans le DOM et les mettre à jour
     for (let id of ids) {
-        var targets = document.querySelectorAll(`[data-id="${id}"]`);
-        for (let target of targets) {
-            const quantity = parseInt(target.getElementsByClassName('itemQuantity')[0].value);
-
-            var product = await get_product(id);
-
-            const amount = parseInt(product.price) * quantity;
-            articles += quantity;
-            total += amount;
-        }
+    // Récupère les éléments correspondant à l'identifiant du produit dans le DOM
+    var targets = document.querySelectorAll(`[data-id="${id}"]`);
+    // Boucle sur chaque élément pour mettre à jour la quantité et le prix
+    for (let target of targets) {
+        // Récupère la quantité de l'élément
+        const quantity = parseInt(target.getElementsByClassName('itemQuantity')[0].value);
+        
+        // Récupère les informations du produit à partir de l'API
+        var product = await get_product(id);
+        
+        // Calcule le prix total pour cette quantité
+        const amount = parseInt(product.price) * quantity;
+        // Incrémente la quantité totale 
+        articles += quantity;
+        // et le prix total
+        total += amount;
     }
+}
+    // Met à jour les totaux affichés sur la page
     document.getElementById('totalQuantity').innerHTML = articles;
     document.getElementById('totalPrice').innerHTML = total;
 }
 
+// Fonction pour récupèrer les informations du produit à partir de l'API 
+// en utilisant l'identifiant du produit en paramètre
 async function get_product(id) {
+    // Envoie une requête pour récupérer les informations du produit
     const response = await fetch(url + id);
+    // Retourne les informations sous forme de JSON
     return await response.json();
 }
 
-
+// Fonction pour mettre à jour le prix total du panier
 async function submit() {
 // Vide les messages d'erreur pour les champs "firstName", "lastName", "address", "city" et "email"
     get_data('firstNameErrorMsg').innerHTML = '';
@@ -182,59 +234,91 @@ async function submit() {
         window.location.href = '/front/html/confirmation.html?orderId=' + response.orderId;;
     }
 }
-
+// Fonction pour valider les données saisies par le client
 function validate_customer_data() {
+    // Déclare une expression régulière pour valider le nom
     const name_regex = new RegExp('[A-Za-z \-]+');
 
+    // Récupère la valeur du champ "firstName"
     const firstName = get_data('firstName').value;
+    // Si la valeur saisie ne correspond pas à l'expression régulière
     if (!name_regex.test(firstName)) {
+        // Affiche un message d'erreur 
         get_data('firstNameErrorMsg').innerHTML = 'Le prénom est invalide.';
     }
 
+    /// Récupère la valeur du champ "lastName"
     const lastName = get_data('lastName').value;
+    // Si la valeur saisie ne correspond pas à l'expression régulière
     if (!name_regex.test(lastName)) {
+        // Affiche un message d'erreur
         get_data('lastNameErrorMsg').innerHTML = 'Le nom est invalide.';
-    }
+}
+    // Sinon, si un message d'erreur est affiché
     else if (get_data('lastNameErrorMsg').innerHTML) {
+        // Efface le message d'erreur
         get_data('lastNameErrorMsg').innerHTML = '';
-    }
+}
 
+    // Déclare une expression régulière pour valider l'adresse
     const address_regex = new RegExp('[\w \-]+');
+    // Récupère la valeur du champ "address"
     const address = get_data('address').value;
+    // Vérifie si la valeur saisie ne correspond pas à l'expression régulière
     if (!address_regex.test(address)) {
+        // Affiche un message d'erreur
         get_data('addressErrorMsg').innerHTML = 'L’adresse est invalide.';
-    }
+}
 
+    // Récupère la valeur du champ "city"
     const city = get_data('city').value;
+    // Si la valeur saisie ne correspond pas à l'expression régulière
     if (!name_regex.test(city)) {
+        // Affiche un message d'erreur 
         get_data('cityErrorMsg').innerHTML = 'La ville est invalide.';
-    }
+}
 
+    // Déclare une expression régulière pour valider l'email
     const email_regex = new RegExp('[A-Za-z\.\-]+@[A-Za-z\.\-]{2,}\.[a-zA-Z]{2,}');
+    // Récupère la valeur du champ "email"
     const email = get_data('email').value;
-    if (!email_regex.test(email)) {
+        // Si la valeur saisie ne correspond pas à l'expression régulière
+        if (!email_regex.test(email)) {
+        // Affiche un message d'erreur
         get_data('emailErrorMsg').innerHTML = 'L’addresse mail est invalide.';
     }
 }
 
+// Fonction pour récupérer l'élément HTML à partir de son identifiant (id)
 function get_data(id) {
     return document.getElementById(id);
 }
 
+// Envoie une requête HTTP POST pour envoyer les données de commande 
+// à l'URL spécifiée en utilisant la méthode fetch 
 async function send(data) {
     const response = await fetch(url + 'order', {
+        // La méthode utilisée pour envoyer les données est POST
         method: 'POST',
-        mode: 'cors', // no-cors, *cors, same-origin
+        // Le mode CORS,
+        mode: 'cors', 
+        // la méthode de cache
         cache: 'no-cache',
-        credentials: 'same-origin', // include, *same-origin, omit
+        // les informations d'identification
+        credentials: 'same-origin', 
+        // les en-têtes
         headers: {
             'Content-Type': 'application/json'
         },
-        redirect: 'follow', // manual, *follow, error
-        referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-        body: JSON.stringify(data) // body data type must match "Content-Type" header
+        // les informations de redirection
+        redirect: 'follow', 
+        referrerPolicy: 'no-referrer', 
+        body: JSON.stringify(data) 
+        // sont configurés pour que les données soient envoyées 
+        // de manière sécurisée.
     });
 
+    // Retourne la réponse en format JSON.
     return await response.json();
 }
 

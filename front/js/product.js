@@ -1,122 +1,121 @@
-// déclare une constante nommée "url" qui contient l'URL de l'API pour les produits.
+// Déclaration de l'URL de l'API
 const url = 'http://localhost:3000/api/products/';
-// déclare une variable globale nommée "product"
+
+// Déclare une variable pour stocker le produit sélectionné
 let product = '';
 
-// utilise l'événement "load" de la fenêtre pour déclencher une fonction lorsque la page est chargée
+// Ecoute de l'événement de chargement de la fenêtre
 window.addEventListener('load', function () {
-    // récupère les paramètres dans l'URL de la page
+    // Récupère les paramètres de la requête de l'URL
     const param = window.location.search;
-    // vérifie si les paramètres de recherche existent, si oui, excute les instructions suivantes 
+    // Si des paramètres sont présents
     if (param) {
-        // appelle la fonction "get_product" en lui passant les paramètres de recherche
+        // Appel de la fonction pour récupérer le produit sélectionné
         get_product(param);
 
-        // ajout un écouteur d'événement sur le bouton "Ajouter au panier"
+        // Ecoute de l'événement "click" sur le bouton "Ajouter au panier"
         document.getElementById('addToCart').addEventListener('click', (event) => {
-             // appel de la fonction pour ajouter un produit au panier
+            // Appel de la fonction pour ajouter le produit au panier
             add_to_cart(product);
         });
     }
 });
 
-// cherche de façon asynchrone les informations du produit correspondant à l'id donné dans les paramètres 
-// de recherche et  met à jour les informations sur la page.
+// Fonction pour récupérer le produit sélectionné à partir de l'API
 async function get_product(param) {
-    // crée un nouvel objet qui va permettre d'extraire l'id dans les paramètres de recherche
+    // Récupère l'ID du produit à partir des paramètres de la requête
     id = new URLSearchParams(param).get('id');
-    // envoie une requête asynchrone pour aller chercher les informations du produit correspondant à l'id 
-    // à l'URL de l'API.
+    // Récupère les données du produit à partir de l'API
     const response = await fetch(url + id);
-    // attend la réponse de la requête précédente puis la parse en json et la stock dans la variable product
+    // Stock les données du produit dans la variable déclarée en haut
     product = await response.json();
-    //récupére l'élément HTML pour afficher l'image du produit
+
+    // Récupère l'élément HTML pour afficher l'image du produit
     const img = document.getElementsByClassName('item__img')[0];
-    //affichage de l'image dans l'élément HTML
+
+    // Affiche l'image du produit dans l'élément HTML
     img.innerHTML = `<img src="${product.imageUrl}" alt="${product.altTxt}"></img>`;
-    //appel des fonctions pour afficher les données du produit
+
+    // Affiche le nom, le prix et la description du produit sur la page HTML
     set_value('title', product.name);
     set_value('price', product.price);
     set_value('description', product.description);
+    // Affiche la liste des couleurs disponibles pour le produit sur la page HTML
     set_list('colors', product.colors);
 }
 
-// déclare une fonction nommée "set_value" qui prend en paramètres "target" et "value"
+// Fonction pour mettre à jour la valeur d'un élément HTML
 function set_value(target, value) {
-    // récupére l'élément HTML avec l'ID spécifié par "target" et met à jour son 
-    // contenu avec la valeur spécifiée par "value"
-    document.getElementById(target).innerHTML = value;
+    // Récupère l'élément HTML ciblé par son ID
+    var element = document.getElementById(target);
+    // Affecte la valeur passée en argument à la propriété innerHTML de l'élément
+    element.innerHTML = value;
 }
-// déclare une fonction nommée "set_list" qui prend en paramètres "target" et "options"
+
+// Fonction pour créer une liste d'options pour un élément HTML de type "select"
 function set_list(target, options) {
-    // récupère l'élément HTML avec l'ID spécifié par "target"
+    // Récupère l'élément HTML ciblé par son ID
     var select = document.getElementById(target);
 
-    //démarre une boucle qui itère sur tous les éléments dans le tableau d'options, pour 
-    //ajouter chaque option à la liste déroulante
+    // Boucle sur les options passées en argument
     for (var i = 0; i < options.length; i++) {
-        // crée un nouvel élément "option" pour la liste déroulante
+        // Crée un élément HTML "option"
         var option = document.createElement("option");
-        // itére à l'élément correspondant dans le tableau d'options.
+        // Affecte la valeur et le texte de l'option
         option.value = options[i];
         option.text = options[i];
-        // ajoute l'option créée à l'élément "select" (la liste déroulante)
+        // Ajoute l'option à l'élément "select"
         select.appendChild(option);
     }
 }
 
-// ajouter un produit au panier
+// Fonction pour ajouter le produit au panier
 function add_to_cart(product) {
-    // récupère la valeur de l'élément HTML avec l'ID "colors" (la liste déroulante de couleurs)
+    // Récupère la couleur sélectionnée
     const color = document.getElementById('colors').value;
-    // vérifie si une couleur a été sélectionnée par l'utilisateur
+    // Vérifie si une couleur a été sélectionnée
     if (color) {
-        // récupère la valeur de l'élément HTML avec l'ID "quantity" (champ de saisie de quantité) 
+        // Récupère la quantité saisie
         var quantity = parseInt(document.getElementById('quantity').value);
-        // vérifie si une quantité a été spécifiée par l'utilisateur
+        // Vérifie si une quantité a été saisie
         if (quantity) {
-
-             // Récupére l'ID du produit
+            // Définit une clé pour le produit dans le stockage local
             const key = product._id;
 
-            // Récupére l'enregistrement du produit dans le localStorage (si existant)
+            // Récupère les données du produit dans le stockage local
             var record = JSON.parse(localStorage.getItem(key));
 
-             // Vérifie si la couleur sélectionnée est déjà enregistrée pour ce produit dans le localStorage
+            // Vérifie si le produit est déjà dans le panier
             if (record && record[color]) {
-                // Si oui, ajout de la quantité saisie à la quantité existante
-                var total = (parseInt(record[color]) || 0) + quantity;
+                // Calcule la quantité totale pour cette couleur
+                var total = (parseInt(enregistrement[couleur]) || 0) + quantité ; 
 
-                // Met à jour de la quantité pour cette couleur dans l'enregistrement
-                record[color] = total;
+             // Met à jour la quantité pour cette couleur
+             record[color] = total;
             }
-            // Vérifie si l'enregistrement existe mais ne contient pas encore de quantité pour cette couleur
             else if (record && !record[color]) {
-                // Si oui, ajout de la quantité saisie pour cette couleur
+                // Ajoute la quantité pour la couleur sélectionnée
                 record[color] = quantity;
             }
-            // Si l'enregistrement n'existe pas encore pour ce produit
             else {
-                // Crée un nouvel enregistrement pour ce produit
+                // Crée un nouvel objet pour le produit
                 record = {};
                 record[color] = quantity;
             }
-            // Enregistre des données dans le localStorage
+            // Enregistre les données du produit dans le stockage local
             localStorage.setItem(key, JSON.stringify(record));
             // Affiche un message de confirmation
-            alert(`Added inside ${key}: ` + localStorage.getItem(key));
+            alert(`Ajouté à l'intérieur de ${key}: ` + localStorage.getItem(key));
         }
     }
-    // vérifie si une couleur n'a pas été sélectionnée par l'utilisateur, si c'est le cas,
     else {
-        // affiche un message d'alerte indiquant à l'utilisateur qu'il doit sélectionner une couleur
-        alert('You must choose a color!');
+        // Affiche un message d'erreur si aucune couleur n'a été sélectionnée
+        alert('Vous devez choisir une couleur!');
     }
-    // vérifie si la quantité saisie par l'utilisateur est inférieure à 1, si c'est le cas
     if (document.getElementById('quantity').value < 1) {
-        // affiche un message d'alerte indiquant à l'utilisateur qu'il doit ajouter au moins un article
-        alert('You must add at least one item!');
-    }
+        // Affiche un message d'erreur si la quantité est inférieure à 1
+        alert('Vous devez ajouter au moins un article!');
+    }   
 }
 
 // J'utilise l'événement "load" de la fenêtre pour déclencher une fonction lorsque la page est chargée. 

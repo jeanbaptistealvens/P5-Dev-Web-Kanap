@@ -1,14 +1,22 @@
+// Ecoute de l'événement de chargement de la fenêtre
 window.addEventListener('load', function () {
+    // Récupère les paramètres de la requête de l'URL
     const param = window.location.search;
+    // Si des paramètres sont présents
     if (param) {
+        // Appel de la fonction pour afficher l'ID de commande
         print_order(param);
     }
-})
+});
 
+// Fonction pour afficher l'ID de commande
 function print_order(param) {
+    // Récupère l'ID de commande à partir des paramètres de la requête
     orderId = new URLSearchParams(param).get('orderId');
+    // Affiche l'ID de commande sur la page HTML
     document.getElementById('orderId').innerHTML = orderId;
 }
+
 
 // J'utilise l'événement "load" de la fenêtre pour déclencher une fonction lorsque la page est chargée. 
 // Il récupère les paramètres dans l'URL de la page en utilisant "window.location.search" et appelle une 

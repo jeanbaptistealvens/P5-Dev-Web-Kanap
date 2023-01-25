@@ -1,23 +1,32 @@
+// Déclaration de l'URL de l'API
 const url = 'http://localhost:3000/api/products/';
 
+// Ecoute de l'événement de chargement de la fenêtre
 window.addEventListener('load', function () {
+    // Récupère l'élément HTML pour afficher les produits
     const items = document.getElementById('items');
+    // Si l'élément existe
     if (items) {
+        // Appel de la fonction pour récupérer les produits
         get_products(items);
     }
-})
+});
 
+// Fonction pour récupérer les produits à partir de l'API
 async function get_products(items) {
+    // Récupère les données des produits à partir de l'API
     const response = await fetch(url);
 
-    if (response.ok) { // if HTTP-status is 200-299
-
-        // get the response body (the method explained below)
+    // Si la réponse est valide
+    if (response.ok) { 
+        // Transforme la réponse en un objet JavaScript
         let products = await response.json();
+        // Initialise une variable pour stocker le code HTML des produits
         let html = '';
 
-        // iterate result and build html code
+        // Pour chaque produit
         products.forEach(product => {
+            // Génère le code HTML 
             let exerpt = `<a href="./product.html?id=${product._id}">
                                 <article>
                                 <img src="${product.imageUrl}" alt="${product.altTxt}">
@@ -26,16 +35,18 @@ async function get_products(items) {
                                 </article>
                             </a>`;
 
-            // concatenate html
+            // Ajoute le code HTML à la variable (concaténer)
             html += exerpt;
         });
 
-        // insert
+        // Affiche les produits sur la page HTML
         items.innerHTML = html;
     } else {
+        // Affiche un message d'erreur
         alert("HTTP-Error: " + response.status);
     }
 }
+
 
 // J'utilise l'événement "load" de la fenêtre pour déclencher une fonction lorsque la page est chargée. 
 // Cette fonction recherche un élément HTML avec l'identifiant "items" et appelle une fonction "get_products" 
