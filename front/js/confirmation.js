@@ -9,14 +9,19 @@ window.addEventListener('load', function () {
     }
 });
 
-// Fonction pour afficher l'ID de commande
 function print_order(param) {
     // Récupère l'ID de commande à partir des paramètres de la requête
-    orderId = new URLSearchParams(param).get('orderId');
-    // Affiche l'ID de commande sur la page HTML
-    document.getElementById('orderId').innerHTML = orderId;
+    const orderId = new URLSearchParams(param).get('orderId');
+    // Récupère l'élément HTML qui contient l'ID de commande
+    const orderIdElement = document.getElementById("orderId");
+    // Modifie le contenu de l'élément pour afficher l'ID de commande
+    orderIdElement.innerHTML = orderId;
+    // Crée un nouvel élément HTML pour le message de remerciement
+    const thankYouMessage = document.createElement("p");
+    thankYouMessage.innerHTML = "Merci pour votre achat !";
+    // Ajoute le message de remerciement en dessous de l'ID de commande
+    orderIdElement.parentNode.appendChild(thankYouMessage);
 }
-
 
 // J'utilise l'événement "load" de la fenêtre pour déclencher une fonction lorsque la page est chargée. 
 // Il récupère les paramètres dans l'URL de la page en utilisant "window.location.search" et appelle une 

@@ -121,7 +121,15 @@ var record = JSON.parse(localStorage.getItem(id));
 // Met à jour la quantité pour la couleur spécifiée
 record[color] = quantity;
 // Enregistre les informations mises à jour dans le stockage local
-localStorage.setItem(id, JSON.stringify(record));
+if (quantity>0 && quantity<101){
+    localStorage.setItem(id, JSON.stringify(record));
+} 
+else {
+    // Affiche un message d'erreur si la quantité saisie est inférieure à 1
+    if (quantity < 1) alert('Vous devez ajouter au moins 1 article!');
+    // Affiche un message d'erreur si la quantité saisie est supérieure à 100
+    if (quantity > 100) alert('Vous ne pouvez pas ajouter plus de 100 articles!');
+}
 
 // Appelle la fonction pour mettre à jour le prix total
 await update_price();
@@ -234,60 +242,72 @@ async function submit() {
         window.location.href = '/front/html/confirmation.html?orderId=' + response.orderId;;
     }
 }
-// Fonction pour valider les données saisies par le client
+
 function validate_customer_data() {
-    // Déclare une expression régulière pour valider le nom
-    const name_regex = new RegExp('[A-Za-z \-]+');
+    // Déclare les expressions régulières pour valider les données
+    const nameRegex = /^[A-Za-zàâäèéêîïôöùûüÿçÀÂÄÈÉÊËÎÏÔÖÙÛÜŸÇ -]+$/;
+    const addressRegex = /^[\wàâäèéêëîïôöùûüçÀÂÄÈÉÊËÎÏÔÖÙÛÜÇ' -]{10,}$/;
+    const emailRegex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g;
 
-    // Récupère la valeur du champ "firstName"
+    // Récupère les valeurs des champs et les messages d'erreur
     const firstName = get_data('firstName').value;
-    // Si la valeur saisie ne correspond pas à l'expression régulière
-    if (!name_regex.test(firstName)) {
-        // Affiche un message d'erreur 
-        get_data('firstNameErrorMsg').innerHTML = 'Le prénom est invalide.';
-    }
-
-    /// Récupère la valeur du champ "lastName"
+    const firstNameError = get_data('firstNameErrorMsg');
     const lastName = get_data('lastName').value;
-    // Si la valeur saisie ne correspond pas à l'expression régulière
-    if (!name_regex.test(lastName)) {
-        // Affiche un message d'erreur
-        get_data('lastNameErrorMsg').innerHTML = 'Le nom est invalide.';
-}
-    // Sinon, si un message d'erreur est affiché
-    else if (get_data('lastNameErrorMsg').innerHTML) {
-        // Efface le message d'erreur
-        get_data('lastNameErrorMsg').innerHTML = '';
-}
-
-    // Déclare une expression régulière pour valider l'adresse
-    const address_regex = new RegExp('[\w \-]+');
-    // Récupère la valeur du champ "address"
+    const lastNameError = get_data('lastNameErrorMsg');
     const address = get_data('address').value;
-    // Vérifie si la valeur saisie ne correspond pas à l'expression régulière
-    if (!address_regex.test(address)) {
-        // Affiche un message d'erreur
-        get_data('addressErrorMsg').innerHTML = 'L’adresse est invalide.';
-}
-
-    // Récupère la valeur du champ "city"
+    const addressError = get_data('addressErrorMsg');
     const city = get_data('city').value;
-    // Si la valeur saisie ne correspond pas à l'expression régulière
-    if (!name_regex.test(city)) {
-        // Affiche un message d'erreur 
-        get_data('cityErrorMsg').innerHTML = 'La ville est invalide.';
-}
-
-    // Déclare une expression régulière pour valider l'email
-    const email_regex = new RegExp('[A-Za-z\.\-]+@[A-Za-z\.\-]{2,}\.[a-zA-Z]{2,}');
-    // Récupère la valeur du champ "email"
+    const cityError = get_data('cityErrorMsg');
     const email = get_data('email').value;
-        // Si la valeur saisie ne correspond pas à l'expression régulière
-        if (!email_regex.test(email)) {
-        // Affiche un message d'erreur
-        get_data('emailErrorMsg').innerHTML = 'L’addresse mail est invalide.';
+    const emailError = get_data('emailErrorMsg');
+
+    // Ajouter l'attribut "required" aux champs de formulaire
+    firstName.required = true;
+    lastName.required = true;
+    address.required = true;
+    city.required = true;
+    email.required = true;
+
+    // Valide les données saisies
+    if (!nameRegex.test(firstName)) {
+        firstNameError.innerHTML = 'Le prénom est invalide.';
+    } else {
+        firstNameError.innerHTML = '';
+    }
+    if (!nameRegex.test(lastName)) {
+        lastNameError.innerHTML = 'Le nom est invalide.';
+    } else {
+        lastNameError.innerHTML = '';
+    }
+    if (!addressRegex.test(address)) {
+        addressError.innerHTML = 'L’adresse est invalide. Elle doit contenir au moins 10 caractères';
+    } else {
+        addressError.innerHTML = '';
+    }
+    if (!nameRegex.test(city)) {
+        cityError.innerHTML = 'La ville est invalide.';
+    } else {
+        cityError.innerHTML = '';
+    }
+    if (!emailRegex.test(email)) {
+        emailError.innerHTML = 'L’addresse mail est invalide.';
+    } else {
+        emailError.innerHTML = '';
     }
 }
+
+// Cela ajoute un écouteur d'événements "input" pour chaque champ de saisie, qui déclenchera 
+// la fonction "validate_customer_data" chaque fois que l'utilisateur entre des données dans le champ. 
+const firstName = get_data('firstName');
+firstName.addEventListener('input', validate_customer_data);
+const lastName = get_data('lastName');
+lastName.addEventListener('input', validate_customer_data);
+const address = get_data('address');
+address.addEventListener('input', validate_customer_data);
+const city = get_data('city');
+city.addEventListener('input', validate_customer_data);
+const email = get_data('email');
+email.addEventListener('input', validate_customer_data);
 
 // Fonction pour récupérer l'élément HTML à partir de son identifiant (id)
 function get_data(id) {
@@ -324,12 +344,12 @@ async function send(data) {
 
 // J'utilise l'événement "load" de la fenêtre pour déclencher une fonction lorsque la page est chargée. Il recherche un 
 // élément HTML avec l'identifiant "cart__items" et appelle les fonctions "fill" et "watch" si l'élément est présent. J'utilise 
-// ensuite la fonction "if" pour permettre quoi qu'il arrive que les données  soient exploitables et d'éviter donc de produire des erreurs.
+// ensuite la fonction "if" pour permettre quoi qu'il arrive que les données soient exploitables et d'éviter donc de produire des erreurs.
 
 // J'utilise la fonction "fill" qui utilise l'objet "localStorage" pour récupérer les données des produits ajoutés au panier et 
 // pour construire une chaîne HTML qui affiche ces produits. J'utilise des boucles pour parcourir les produits et les couleurs, et 
 // j'utilise des fonctions "get_product" pour récupérer les données des produits. J'utilise également des variables pour calculer le 
-// total de la quantité et le total des prix. J'utilise la fonction "parseInt" est pour convertir la valeur de la quantité d'un article 
+// total de la quantité et le total des prix. J'utilise la fonction "parseInt"pour convertir la valeur de la quantité d'un article 
 // dans le panier stocké dans le localStorage en un nombre entier avant de l'utiliser pour calculer le total de la quantité et le total du 
 // prix. Cela s'assure que les calculs mathématiques effectués sur ces valeurs sont corrects et précis. J'utilise ensuite la propriété 
 // "innerHTML" pour insérer cette chaîne HTML dans la page et mettre à jour les éléments de totalisation.
