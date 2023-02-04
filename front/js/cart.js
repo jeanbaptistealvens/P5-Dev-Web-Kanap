@@ -163,40 +163,33 @@ await update_price();
 }
 
 // Fonction pour mettre à jour le prix total du panier
+// Ajouter la condition pour ignorer les quantités inférieures à 0 ou supérieures à 100 lors du calcul du total
+// afin de s'assurer que la quantité ne s'incrémente pas si elle est inférieure à 0 ou supérieure à 100
 async function update_price() {
-    // Initialise la quantité total à 0 
     var articles = 0;
-    // Initialise le prix total à 0 
     var total = 0;
 
-    // Récupère les identifiants des produits stockés dans le stockage local
-    // pour les utiliser dans la boucle pour cibler les éléments correspondants dans le DOM.
     const ids = Object.keys(localStorage);
 
-    // Boucle sur chaque id pour récupérer les éléments correspondants dans le DOM et les mettre à jour
     for (let id of ids) {
-    // Récupère les éléments correspondant à l'identifiant du produit dans le DOM
-    var targets = document.querySelectorAll(`[data-id="${id}"]`);
-    // Boucle sur chaque élément pour mettre à jour la quantité et le prix
-    for (let target of targets) {
-        // Récupère la quantité de l'élément
-        const quantity = parseInt(target.getElementsByClassName('itemQuantity')[0].value);
-        
-        // Récupère les informations du produit à partir de l'API
-        var product = await get_product(id);
-        
-        // Calcule le prix total pour cette quantité
-        const amount = parseInt(product.price) * quantity;
-        // Incrémente la quantité totale 
-        articles += quantity;
-        // et le prix total
-        total += amount;
+        var targets = document.querySelectorAll(`[data-id="${id}"]`);
+        for (let target of targets) {
+            const quantity = parseInt(target.getElementsByClassName('itemQuantity')[0].value);
+            
+            if (quantity < 0 || quantity > 100) {
+                ignorer;
+            }
+            
+            var product = await get_product(id);
+            
+            const amount = parseInt(product.price) * quantity;
+            articles += quantity;
+            total += amount;
+        }
     }
-}
-    // Met à jour les totaux affichés sur la page
     document.getElementById('totalQuantity').innerHTML = articles;
     document.getElementById('totalPrice').innerHTML = total;
-}
+}  
 
 // Fonction pour récupèrer les informations du produit à partir de l'API 
 // en utilisant l'identifiant du produit en paramètre
@@ -342,24 +335,3 @@ async function send(data) {
     return await response.json();
 }
 
-// J'utilise l'événement "load" de la fenêtre pour déclencher une fonction lorsque la page est chargée. Il recherche un 
-// élément HTML avec l'identifiant "cart__items" et appelle les fonctions "fill" et "watch" si l'élément est présent. J'utilise 
-// ensuite la fonction "if" pour permettre quoi qu'il arrive que les données soient exploitables et d'éviter donc de produire des erreurs.
-
-// J'utilise la fonction "fill" qui utilise l'objet "localStorage" pour récupérer les données des produits ajoutés au panier et 
-// pour construire une chaîne HTML qui affiche ces produits. J'utilise des boucles pour parcourir les produits et les couleurs, et 
-// j'utilise des fonctions "get_product" pour récupérer les données des produits. J'utilise également des variables pour calculer le 
-// total de la quantité et le total des prix. J'utilise la fonction "parseInt"pour convertir la valeur de la quantité d'un article 
-// dans le panier stocké dans le localStorage en un nombre entier avant de l'utiliser pour calculer le total de la quantité et le total du 
-// prix. Cela s'assure que les calculs mathématiques effectués sur ces valeurs sont corrects et précis. J'utilise ensuite la propriété 
-// "innerHTML" pour insérer cette chaîne HTML dans la page et mettre à jour les éléments de totalisation.
-
-// J'utilise la fonction "watch" et j'ajoute des événements "change" et "click" aux éléments de la page pour permettre à l'utilisateur 
-// de mettre à jour la quantité et de supprimer des produits du panier. J'ajoute également un événement "click" au bouton de commande 
-// pour lancer la fonction "submit" lorsque l'utilisateur clique dessus.
-
-// J'utilise les fonctions "update_quantity", "remove" et "update_price"pour mettre à jour les informations de panier en utilisant l'objet 
-// "localStorage" et pour mettre à jour les éléments de la page en conséquence.
-
-// En gros, mon code permet d'afficher les produits ajoutés au panier, de permettre à l'utilisateur de mettre à jour les quantités et de 
-// supprimer les produits, et de soumettre la commande.
