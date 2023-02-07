@@ -163,7 +163,7 @@ await update_price();
 }
 
 // Fonction pour mettre à jour le prix total du panier
-// Ajouter la condition pour ignorer les quantités inférieures à 0 ou supérieures à 100 lors du calcul du total
+// Ignorer les quantités inférieures à 0 ou supérieures à 100 lors du calcul du total
 // afin de s'assurer que la quantité ne s'incrémente pas si elle est inférieure à 0 ou supérieure à 100
 async function update_price() {
     var articles = 0;

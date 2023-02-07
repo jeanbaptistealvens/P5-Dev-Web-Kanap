@@ -4,8 +4,9 @@ window.addEventListener('load', function () {
     const param = window.location.search;
     // Si des paramètres sont présents
     if (param) {
-        // Appel de la fonction pour afficher l'ID de commande et appel de la fonction pour réinitialiser le locastorage
+        // Appel de la fonction pour afficher l'ID de commande et 
         print_order(param);
+        // Appel de la fonction pour réinitialiser le locastorage
         resetLocalStorage();
     }
 });
