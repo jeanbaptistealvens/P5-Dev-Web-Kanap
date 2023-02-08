@@ -123,12 +123,15 @@ record[color] = quantity;
 // Enregistre les informations mises à jour dans le stockage local
 if (quantity>0 && quantity<101){
     localStorage.setItem(id, JSON.stringify(record));
+    location.reload() 
 } 
 else {
     // Affiche un message d'erreur si la quantité saisie est inférieure à 1
     if (quantity < 1) alert('Vous devez ajouter au moins 1 article!');
+    location.reload()
     // Affiche un message d'erreur si la quantité saisie est supérieure à 100
     if (quantity > 100) alert('Vous ne pouvez pas ajouter plus de 100 articles!');
+    location.reload()
 }
 
 // Appelle la fonction pour mettre à jour le prix total
@@ -175,10 +178,6 @@ async function update_price() {
         var targets = document.querySelectorAll(`[data-id="${id}"]`);
         for (let target of targets) {
             const quantity = parseInt(target.getElementsByClassName('itemQuantity')[0].value);
-            
-            if (quantity < 0 || quantity > 100) {
-                ignorer;
-            }
             
             var product = await get_product(id);
             
